@@ -6,7 +6,7 @@
 #include <QMainWindow>
 #include <QGraphicsScene>
 
-enum class UIEnableState
+enum class ProgramState
 {
     Closed,
     NewFile,
@@ -111,10 +111,14 @@ private:
     int gfxBmp_lastValue = 0;
     int animFrame_lastSize = 0;
 
-    void setUIEnableState(UIEnableState mode);
+    void setProgramState(ProgramState mode);
 
     void getBinaryIconPtr(u8*& ncg, u16*& ncl, int bmpID, int palID);
     void updateIconView(int bmpID, int ncgID);
+
+    bool checkIfAllowClose();
+    void closeEvent(QCloseEvent *event);
+
     void saveFile(const QString& path);
 
     void setAnimGroupBlockSignals(bool flag);

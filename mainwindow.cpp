@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->gfx_gv->setScene(&this->gfx_scene);
     this->lastDirPath = QDir::homePath();
 
-    setUIEnableState(UIEnableState::Closed);
+    setProgramState(ProgramState::Closed);
 }
 
 MainWindow::~MainWindow()
@@ -28,9 +28,9 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::setUIEnableState(UIEnableState mode)
+void MainWindow::setProgramState(ProgramState mode)
 {
-    bool closed = mode == UIEnableState::Closed;
+    bool closed = mode == ProgramState::Closed;
 
     ui->gfx_gb->setEnabled(!closed);
     ui->gameTitle_gb->setEnabled(!closed);
@@ -38,7 +38,7 @@ void MainWindow::setUIEnableState(UIEnableState mode)
 
     ui->actionNew->setEnabled(closed);
     ui->actionOpen->setEnabled(closed);
-    ui->actionSave->setEnabled(mode == UIEnableState::KnowsPath);
+    ui->actionSave->setEnabled(mode == ProgramState::KnowsPath);
     ui->actionSave_As->setEnabled(!closed);
     ui->actionClose->setEnabled(!closed);
 
@@ -52,6 +52,7 @@ void MainWindow::setUIEnableState(UIEnableState mode)
     if(closed)
     {
         this->gfx_scene.clear();
+        this->openedFileName.clear();
 
         ui->gfxBmp_sb->setValue(0);
         ui->gfxPal_sb->setValue(0);
@@ -62,6 +63,9 @@ void MainWindow::setUIEnableState(UIEnableState mode)
 
         ui->animFrame_cb->clear();
         setAnimGroupEnabled(false);
+
+        this->gfxBmp_lastValue = 0;
+        this->animFrame_lastSize = 0;
     }
 
     ui->gfxPal_sb->setEnabled(false);
@@ -103,6 +107,30 @@ void MainWindow::updateIconView(int bmpID, int palID)
     gfx_scene.addPixmap(pixmap);
 }
 
+bool MainWindow::checkIfAllowClose()
+{
+    //If possible, check if file was modified
+    QFile openFile(this->openedFileName);
+    if(openFile.open(QIODevice::ReadOnly))
+    {
+        bool isDifferent = memcmp(openFile.readAll().data(), &this->bannerBin, sizeof(NDSBanner));
+        openFile.close();
+
+        if(isDifferent)
+        {
+            QMessageBox::StandardButton btn = QMessageBox::question(this, tr("You sure?"), tr("There are unsaved changes!\nAre you sure you want to close?"));
+            if(btn == QMessageBox::No)
+                return false;
+        }
+    }
+    return true;
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    checkIfAllowClose() ? event->accept() : event->ignore();
+}
+
 /* ======== MENU BAR ACTIONS GROUP ======== */
 
 void MainWindow::on_actionNew_triggered()
@@ -123,14 +151,14 @@ void MainWindow::on_actionNew_triggered()
     fileNCG.close();
     fileNCL.close();
 
-    QString title = "The crazy smiley quest!\nNinTHONKS";
+    QString title = "The crazy smiley quest!\nSmiley Corporation";
     for(int i = 0; i < 8; i++)
         memcpy(&this->bannerBin.title[i], title.data(), title.length() * 2);
 
     updateIconView(-1, -1);
     on_gameTitle_cb_currentIndexChanged(0);
 
-    setUIEnableState(UIEnableState::NewFile);
+    setProgramState(ProgramState::NewFile);
 }
 
 void MainWindow::on_actionOpen_triggered()
@@ -181,7 +209,7 @@ void MainWindow::on_actionOpen_triggered()
         setAnimGroupEnabled(true);
     on_animFrame_cb_currentIndexChanged(0);
 
-    setUIEnableState(UIEnableState::KnowsPath);
+    setProgramState(ProgramState::KnowsPath);
 }
 
 void MainWindow::saveFile(const QString& path)
@@ -218,13 +246,16 @@ void MainWindow::on_actionSave_As_triggered()
 
 void MainWindow::on_actionClose_triggered()
 {
-    this->openedFileName.clear();
-    setUIEnableState(UIEnableState::Closed);
+    if(!checkIfAllowClose())
+        return;
+
+    //Clear everything
+    setProgramState(ProgramState::Closed);
 }
 
 void MainWindow::on_actionCredits_triggered()
 {
-    QMessageBox::about(this, tr("About"), R"(<p><strong>Nintendo DSi Banner Editor</strong></p>
+    QMessageBox::about(this, tr("About"), R"(<p><strong>Nintendo DS Banner Editor</strong></p>
 <p>Copyright &copy; 2020 TheGameratorT</p>
 <p><span style="text-decoration: underline;">Special thanks:</span></p>
 <p style="padding-left: 30px;">Banner format research by <a href="https://problemkaputt.de/gbatek.htm#dscartridgeicontitle">GBATEK<br /></a>Image conversion by <a href="https://github.com/Ed-1T">Ed_IT</a></p>
@@ -493,12 +524,16 @@ void MainWindow::on_gfxImport_pb_clicked()
         return;
     }
 
-    QNDSImage ndsImg(img, 16, 0x80);
+    QNDSImage ndsImg;
 
-    if (!newPalette)
+    if (newPalette)
+    {
+        ndsImg.replace(img, 16, 0x80);
+    }
+    else
     {
         QVector<u16> pltt = QVector<u16>(ncl, ncl + 0x10);
-        ndsImg.applyPalette(img, pltt);
+        ndsImg.replace(img, pltt, true);
     }
 
     QVector<u8> ncgV;

@@ -1,5 +1,11 @@
 #include "qndsimage.h"
 
+QNDSImage::QNDSImage() {}
+
+QNDSImage::QNDSImage(const QImage& img, const QVector<u16>& pal, bool col0Transparent) {
+    replace(img, pal, col0Transparent);
+}
+
 QNDSImage::QNDSImage(const QImage& img, int colorCount, int alphaThreshold) {
     replace(img, colorCount, alphaThreshold);
 }
@@ -38,6 +44,29 @@ u32 QNDSImage::toRgb24(u16 rgb15)
     return (r << 16) | (g << 8) | b;
 }
 
+void QNDSImage::replace(const QImage& img, const QVector<u16>& pal, bool col0Transparent)
+{
+    this->col0Transparent = col0Transparent;
+
+    palette = pal;
+
+    const int newPalSize = pal.size();
+    QVector<QColor> newPal24(newPalSize);
+    for (int i = 0; i < newPalSize; i++)
+        newPal24[i] = toRgb24(pal[i]);
+
+    const int width = img.width();
+    const int height = img.height();
+
+    texture.resize(width * height);
+
+    for (int i = 0, y = 0; y < height; y++)
+        for (int x = 0; x < width; x++, i++)
+            texture[i] = closestMatch(img.pixel(x, y), newPal24);
+
+    texture = getTiled(width / 8, true);
+}
+
 void QNDSImage::replace(const QImage& img, int colorCount, int alphaThreshold)
 {
     this->col0Transparent = alphaThreshold == 0;
@@ -60,7 +89,7 @@ void QNDSImage::replace(const QImage& img, int colorCount, int alphaThreshold)
     }
 
     QVector<u16> newPal = createPalette(pal, colorCount);
-    applyPalette(img, newPal);
+    replace(img, newPal, col0Transparent);
 }
 
 void QNDSImage::replace(const QVector<u8>& ncg, const QVector<u16>& ncl, bool is4bpp, bool col0Transparent)
@@ -180,27 +209,6 @@ void QNDSImage::toNitro(QVector<u8>& ncg, QVector<u16>& ncl, bool is4bpp)
         ncg = texture;
 
     ncl = palette;
-}
-
-void QNDSImage::applyPalette(const QImage& img, const QVector<u16>& pal)
-{
-    palette = pal;
-
-    const int newPalSize = pal.size();
-    QVector<QColor> newPal24(newPalSize);
-    for (int i = 0; i < newPalSize; i++)
-        newPal24[i] = toRgb24(pal[i]);
-
-    const int width = img.width();
-    const int height = img.height();
-
-    texture.resize(width * height);
-
-    for (int i = 0, y = 0; y < height; y++)
-        for (int x = 0; x < width; x++, i++)
-            texture[i] = closestMatch(img.pixel(x, y), newPal24);
-
-    texture = getTiled(width / 8, true);
 }
 
 QVector<u16> QNDSImage::createPalette(const QVector<QColor>& pal, int colorCount)
