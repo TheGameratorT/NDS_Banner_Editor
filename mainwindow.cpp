@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 
 #include "qndsimage.h"
+#include "crc.h"
 #include "ndsbanneranimplayer.h"
 
 #include <QVector>
@@ -220,6 +221,13 @@ void MainWindow::saveFile(const QString& path)
         QMessageBox::critical(this, "Big OOF", tr("Could not open file for writing."));
         return;
     }
+
+    u8* u16BannerBin = reinterpret_cast<u8*>(&this->bannerBin);
+
+    this->bannerBin.crc[0] = crc16(&u16BannerBin[0x20], 0x840 - 0x20);
+    this->bannerBin.crc[1] = crc16(&u16BannerBin[0x20], 0x940 - 0x20);
+    this->bannerBin.crc[2] = crc16(&u16BannerBin[0x20], 0xA40 - 0x20);
+    this->bannerBin.crc[3] = crc16(&u16BannerBin[0x1240], 0x23C0 - 0x1240);
 
     QByteArray out(sizeof(NDSBanner), 0);
     memcpy(out.data(), &this->bannerBin, sizeof(NDSBanner));
