@@ -214,6 +214,8 @@ void QNDSImage::toNitro(QVector<u8>& ncg, QVector<u16>& ncl, bool is4bpp)
 QVector<u16> QNDSImage::createPalette(const QVector<QColor>& pal, int colorCount)
 {
     QVector<QColor> palCopy = pal;
+    if(palCopy.size() < 16)
+        palCopy.resize(16);
 
     // For finding color channel that has the most wide range,
     // we need to keep their lower and upper bound.

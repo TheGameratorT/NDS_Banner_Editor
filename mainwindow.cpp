@@ -249,6 +249,8 @@ void MainWindow::on_actionSave_As_triggered()
     QFileInfo fileInfo(fileName);
     this->lastDirPath = fileInfo.dir().path();
 
+    setProgramState(ProgramState::KnowsPath);
+
     saveFile(fileName);
 }
 
@@ -526,7 +528,7 @@ void MainWindow::on_gfxImport_pb_clicked()
     }
 
     QImage img(fileName);
-    if(img.width() != 32 && img.height() != 32)
+    if(img.width() != 32 || img.height() != 32)
     {
         QMessageBox::critical(this, tr("faTal mEga eRrOR"), tr("Unfortunately??\nyes, unfortunately, the imported image is not 32x32 pixels."));
         return;
