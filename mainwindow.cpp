@@ -10,6 +10,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QFile>
+#include <QStandardItemModel>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -35,6 +36,7 @@ void MainWindow::setProgramState(ProgramState mode)
 
     ui->gfx_gb->setEnabled(!closed);
     ui->gameTitle_gb->setEnabled(!closed);
+    ui->bannerVersion_gb->setEnabled(!closed);
     ui->anim_gb->setEnabled(!closed);
 
     ui->actionNew->setEnabled(closed);
@@ -47,6 +49,7 @@ void MainWindow::setProgramState(ProgramState mode)
     ui->gfxPal_sb->blockSignals(closed);
     ui->gameTitle_cb->blockSignals(closed);
     ui->gameTitle_pte->blockSignals(closed);
+    ui->bannerVersion_cb->blockSignals(closed);
 
     setAnimGroupBlockSignals(closed);
 
@@ -61,6 +64,8 @@ void MainWindow::setProgramState(ProgramState mode)
 
         ui->gameTitle_cb->setCurrentIndex(0);
         ui->gameTitle_pte->setPlainText("");
+
+        ui->bannerVersion_cb->setCurrentIndex(3);
 
         ui->animFrame_cb->clear();
         setAnimGroupEnabled(false);
@@ -114,7 +119,17 @@ bool MainWindow::checkIfAllowClose()
     QFile openFile(this->openedFileName);
     if(openFile.open(QIODevice::ReadOnly))
     {
-        bool isDifferent = memcmp(openFile.readAll().data(), &this->bannerBin, sizeof(NDSBanner));
+        int bannerSize;
+        if(this->bannerBin.version & (1 << 8))
+            bannerSize = sizeof(NDSBanner);
+        else if((this->bannerBin.version & 3) == 3)
+            bannerSize = 0xA40;
+        else if(this->bannerBin.version & 2)
+            bannerSize = 0x940;
+        else
+            bannerSize = 0x840;
+
+        bool isDifferent = memcmp(openFile.readAll().data(), &this->bannerBin, bannerSize);
         openFile.close();
 
         if(isDifferent)
@@ -172,9 +187,9 @@ void MainWindow::on_actionOpen_triggered()
     QFileInfo fileInfo(fileName);
     this->lastDirPath = fileInfo.dir().path();
 
-    if(fileInfo.size() != sizeof(NDSBanner))
+    if(fileInfo.size() != sizeof(NDSBanner) && fileInfo.size() != 0x840 && fileInfo.size() != 0x940 && fileInfo.size() != 0xA40)
     {
-        QMessageBox::information(this, tr("Oops!"), tr("Invalid banner size.\nMake sure the banner file is version 0103.\nIf you want to make an animated icon for a DS game, make a new banner."));
+        QMessageBox::information(this, tr("Oops!"), tr("Invalid banner size.\nMake sure this is a valid banner file."));
         return;
     }
 
@@ -185,7 +200,8 @@ void MainWindow::on_actionOpen_triggered()
         return;
     }
 
-    memcpy(&this->bannerBin, file.readAll().data(), sizeof(NDSBanner));
+    memset(&this->bannerBin, 0, sizeof(NDSBanner));
+    memcpy(&this->bannerBin, file.readAll().data(), file.size());
     file.close();
 
     /* ======== ICON SETUP ======== */
@@ -195,6 +211,17 @@ void MainWindow::on_actionOpen_triggered()
     /* ======== TEXT SETUP ======== */
 
     on_gameTitle_cb_currentIndexChanged(0);
+
+    /* ======== VERSION SETUP ======== */
+
+    if(this->bannerBin.version & (1 << 8))
+        ui->bannerVersion_cb->setCurrentIndex(3);
+    else if((this->bannerBin.version & 3) == 3)
+        ui->bannerVersion_cb->setCurrentIndex(2);
+    else if(this->bannerBin.version & 2)
+        ui->bannerVersion_cb->setCurrentIndex(1);
+    else
+        ui->bannerVersion_cb->setCurrentIndex(0);
 
     /* ======== ANIMATION SETUP ======== */
 
@@ -225,12 +252,22 @@ void MainWindow::saveFile(const QString& path)
     u8* u16BannerBin = reinterpret_cast<u8*>(&this->bannerBin);
 
     this->bannerBin.crc[0] = crc16(&u16BannerBin[0x20], 0x840 - 0x20);
-    this->bannerBin.crc[1] = crc16(&u16BannerBin[0x20], 0x940 - 0x20);
-    this->bannerBin.crc[2] = crc16(&u16BannerBin[0x20], 0xA40 - 0x20);
-    this->bannerBin.crc[3] = crc16(&u16BannerBin[0x1240], 0x23C0 - 0x1240);
+    this->bannerBin.crc[1] = (this->bannerBin.version & 2) ? crc16(&u16BannerBin[0x20], 0x940 - 0x20) : 0;
+    this->bannerBin.crc[2] = ((this->bannerBin.version & 3) == 3) ? crc16(&u16BannerBin[0x20], 0xA40 - 0x20) : 0;
+    this->bannerBin.crc[3] = (this->bannerBin.version & (1 << 8)) ? crc16(&u16BannerBin[0x1240], 0x23C0 - 0x1240) : 0;
 
-    QByteArray out(sizeof(NDSBanner), 0);
-    memcpy(out.data(), &this->bannerBin, sizeof(NDSBanner));
+    int bannerSize;
+    if(this->bannerBin.version & (1 << 8))
+        bannerSize = sizeof(NDSBanner);
+    else if((this->bannerBin.version & 3) == 3)
+        bannerSize = 0xA40;
+    else if(this->bannerBin.version & 2)
+        bannerSize = 0x940;
+    else
+        bannerSize = 0x840;
+
+    QByteArray out(bannerSize, 0);
+    memcpy(out.data(), &this->bannerBin, bannerSize);
 
     file.write(out);
     file.close();
@@ -352,6 +389,47 @@ void MainWindow::on_gameTitle_pb_clicked()
 
         memcpy(this->bannerBin.title[i], this->bannerBin.title[current], 0x100);
     }
+}
+
+/* ======== BANNER VERSION GROUP ======== */
+
+void MainWindow::on_bannerVersion_cb_currentIndexChanged(int index)
+{
+    printf("=====%d\n", index);
+    constexpr int bannerVersions[] = {
+        0x0001, // Normal
+        0x0002, // Chinese
+        0x0003, // Korean
+        0x0103  // DSi
+    };
+
+    this->bannerBin.version = bannerVersions[index];
+
+    // Block animation settings if not DSi banner
+    bool dsiBanner = this->bannerBin.version & (1 << 8);
+    ui->anim_gb->setEnabled(dsiBanner);
+
+    // Only banner 0 exists for non-DSi banners
+    if(!dsiBanner)
+        ui->gfxBmp_sb->setValue(0);
+    ui->gfxBmp_sb->setEnabled(dsiBanner);
+
+    // Ensure the the selected language is valid for this version
+    int maxLanguage;
+    if((this->bannerBin.version & 3) == 3)
+        maxLanguage = 7;
+    else if((this->bannerBin.version & 2))
+        maxLanguage = 6;
+    else
+        maxLanguage = 5;
+
+    if(ui->gameTitle_cb->currentIndex() > maxLanguage) {
+        ui->gameTitle_cb->setCurrentIndex(0);
+    }
+    QStandardItemModel *model = qobject_cast<QStandardItemModel *>(ui->gameTitle_cb->model());
+    Q_ASSERT(model != nullptr);
+    for(int i = 6; i < 8; i++)
+        model->item(i)->setEnabled(i <= maxLanguage);
 }
 
 /* ======== ANIMATION GROUP ======== */

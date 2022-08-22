@@ -60,6 +60,8 @@ private slots:
 
     void on_gameTitle_pb_clicked();
 
+    void on_bannerVersion_cb_currentIndexChanged(int index);
+
     void on_actionSave_triggered();
 
     void on_actionSave_As_triggered();

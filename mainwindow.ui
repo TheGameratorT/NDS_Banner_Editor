@@ -242,7 +242,7 @@
       </layout>
      </widget>
     </item>
-    <item row="0" column="1" rowspan="3">
+    <item row="0" column="1" rowspan="2">
      <widget class="QGroupBox" name="gameTitle_gb">
       <property name="title">
        <string>Title</string>
@@ -307,6 +307,39 @@
        </item>
        <item row="1" column="0" colspan="2">
         <widget class="QPlainTextEdit" name="gameTitle_pte"/>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QGroupBox" name="bannerVersion_gb">
+      <property name="title">
+      <string>Version</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_5">
+       <item row="0" column="0">
+        <widget class="QComboBox" name="bannerVersion_cb">
+         <item>
+          <property name="text">
+           <string>0x0001 – Regular DS</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>0x0002 – Chinese DS</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>0x0003 – Korean DS</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>0x0103 – DSi</string>
+          </property>
+         </item>
+        </widget>
        </item>
       </layout>
      </widget>
