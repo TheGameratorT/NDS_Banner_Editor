@@ -305,7 +305,7 @@ void MainWindow::on_actionCredits_triggered()
     QMessageBox::about(this, tr("About"), R"(<p><strong>Nintendo DS Banner Editor</strong></p>
 <p>Copyright &copy; 2020 TheGameratorT</p>
 <p><span style="text-decoration: underline;">Special thanks:</span></p>
-<p style="padding-left: 30px;">Banner format research by <a href="https://problemkaputt.de/gbatek.htm#dscartridgeicontitle">GBATEK<br /></a>Image conversion by <a href="https://github.com/Ed-1T">Ed_IT</a></p>
+<p style="padding-left: 30px;">Banner format research by <a href="https://problemkaputt.de/gbatek-ds-cartridge-icon-title.htm">GBATEK<br /></a>Image conversion by <a href="https://github.com/Ed-1T">Ed_IT</a></p>
 <p><span style="text-decoration: underline;">License:</span></p>
 <p style="padding-left: 30px;">This application is licensed under the GNU General Public License v3.</p>
 <p style="padding-left: 30px;">This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.</p>
