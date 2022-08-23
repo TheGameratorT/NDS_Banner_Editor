@@ -156,7 +156,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::on_actionNew_triggered()
 {
-    loadFile(":/resources/default.bin");
+    loadFile(":/resources/default.bin", true);
 }
 
 void MainWindow::on_actionOpen_triggered()
@@ -175,10 +175,10 @@ void MainWindow::on_actionOpen_triggered()
         return;
     }
 
-    loadFile(fileName);
+    loadFile(fileName, false);
 }
 
-void MainWindow::loadFile(const QString& path)
+void MainWindow::loadFile(const QString& path, bool isNew)
 {
     QFile file(path);
     if(!file.open(QIODevice::ReadOnly))
@@ -224,7 +224,7 @@ void MainWindow::loadFile(const QString& path)
         setAnimGroupEnabled(true);
     on_animFrame_cb_currentIndexChanged(0);
 
-    setProgramState(ProgramState::KnowsPath);
+    setProgramState(isNew ? ProgramState::NewFile : ProgramState::KnowsPath);
 }
 
 void MainWindow::saveFile(const QString& path)
