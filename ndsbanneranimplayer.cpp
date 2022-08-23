@@ -48,7 +48,7 @@ void NDSBannerAnimPlayer::window_shown()
             QVector<u8> ncg(pNCG, pNCG + 0x200);
             QVector<u16> ncl(pNCL, pNCL + 0x10);
 
-            QNDSImage ndsImg(ncg, ncl, true, true);
+            QNDSImage ndsImg(ncg, ncl, true);
             this->frames[i] = QPixmap::fromImage(ndsImg.toImage(4));
 
             int xs = animData->flipH ? -1 : 1;

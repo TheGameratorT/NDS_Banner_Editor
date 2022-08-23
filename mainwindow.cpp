@@ -101,7 +101,7 @@ QPixmap MainWindow::getCurrentPixmap(int bmpID, int palID)
     QVector<u8> ncgV = QVector<u8>(ncg, ncg + 0x200);
     QVector<u16> nclV = QVector<u16>(ncl, ncl + 0x10);
 
-    QNDSImage ndsImg(ncgV, nclV, true, true);
+    QNDSImage ndsImg(ncgV, nclV, true);
     return QPixmap::fromImage(ndsImg.toImage(4));
 }
 
@@ -621,7 +621,7 @@ void MainWindow::on_gfxImport_pb_clicked()
     else
     {
         QVector<u16> pltt = QVector<u16>(ncl, ncl + 0x10);
-        ndsImg.replace(img, pltt, true);
+        ndsImg.replace(img, pltt, 0x80);
     }
 
     QVector<u8> ncgV;

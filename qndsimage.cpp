@@ -2,16 +2,16 @@
 
 QNDSImage::QNDSImage() {}
 
-QNDSImage::QNDSImage(const QImage& img, const QVector<u16>& pal, bool col0Transparent) {
-    replace(img, pal, col0Transparent);
+QNDSImage::QNDSImage(const QImage& img, const QVector<u16>& pal, int alphaThreshold) {
+    replace(img, pal, alphaThreshold);
 }
 
 QNDSImage::QNDSImage(const QImage& img, int colorCount, int alphaThreshold) {
     replace(img, colorCount, alphaThreshold);
 }
 
-QNDSImage::QNDSImage(const QVector<u8>& ncg, const QVector<u16>& ncl, bool is4bpp, bool col0Transparent) {
-    replace(ncg, ncl, is4bpp, col0Transparent);
+QNDSImage::QNDSImage(const QVector<u8>& ncg, const QVector<u16>& ncl, bool is4bpp) {
+    replace(ncg, ncl, is4bpp);
 }
 
 u16 QNDSImage::toRgb15(u32 rgb24)
@@ -22,9 +22,9 @@ u16 QNDSImage::toRgb15(u32 rgb24)
     g = (rgb24 >> 8) & 0xFF;
     b = (rgb24 >> 0) & 0xFF;
 
-    r >>= 3;
-    g >>= 3;
-    b >>= 3;
+    r = round(r * 31.0 / 255.0);
+    g = round(g * 31.0 / 255.0);
+    b = round(b * 31.0 / 255.0);
 
     return (b << 10) | (g << 5) | r;
 }
@@ -37,17 +37,15 @@ u32 QNDSImage::toRgb24(u16 rgb15)
     g = (rgb15 >> 5) & 0x1F;
     b = (rgb15 >> 10) & 0x1F;
 
-    r = (r << 3) | (r >> 2);
-    g = (g << 3) | (g >> 2);
-    b = (b << 3) | (b >> 2);
+    r = round(r * 255.0 / 31.0);
+    g = round(g * 255.0 / 31.0);
+    b = round(b * 255.0 / 31.0);
 
     return (r << 16) | (g << 8) | b;
 }
 
-void QNDSImage::replace(const QImage& img, const QVector<u16>& pal, bool col0Transparent)
+void QNDSImage::replace(const QImage& img, const QVector<u16>& pal, int alphaThreshold)
 {
-    this->col0Transparent = col0Transparent;
-
     palette = pal;
 
     const int newPalSize = pal.size();
@@ -62,40 +60,35 @@ void QNDSImage::replace(const QImage& img, const QVector<u16>& pal, bool col0Tra
 
     for (int i = 0, y = 0; y < height; y++)
         for (int x = 0; x < width; x++, i++)
-            texture[i] = closestMatch(img.pixel(x, y), newPal24);
+            texture[i] = closestMatch(img.pixelColor(x, y), newPal24, alphaThreshold);
 
     texture = getTiled(width / 8, true);
 }
 
 void QNDSImage::replace(const QImage& img, int colorCount, int alphaThreshold)
 {
-    this->col0Transparent = alphaThreshold == 0;
-
     const int width = img.width();
     const int height = img.height();
 
     QVector<QColor> pal;
-    pal.append(QColor(0, 0, 0, 0)); //Make transparent the first color
+    pal.append(QColor(0xFF, 0x00, 0xFF, 0x00)); //Make transparent the first color
+    QColor magenta = QColor(0xFF, 0x00, 0xFF, 0xFF);
 
     for(int y = 0; y < height; y++) {
         for(int x = 0; x < width; x++)
         {
             QColor c = img.pixelColor(x, y);
-            if(c.alpha() < alphaThreshold)
-                c = QColor(0, 0, 0, 0);
-            if(!pal.contains(c))
+            if(!pal.contains(c) && c.alpha() >= alphaThreshold && c != magenta)
                 pal.append(c);
         }
     }
 
     QVector<u16> newPal = createPalette(pal, colorCount);
-    replace(img, newPal, col0Transparent);
+    replace(img, newPal, alphaThreshold);
 }
 
-void QNDSImage::replace(const QVector<u8>& ncg, const QVector<u16>& ncl, bool is4bpp, bool col0Transparent)
+void QNDSImage::replace(const QVector<u8>& ncg, const QVector<u16>& ncl, bool is4bpp)
 {
-    this->col0Transparent = col0Transparent;
-
     if(is4bpp)
     {
         const int texSize = ncg.size() << 1;
@@ -180,7 +173,7 @@ QImage QNDSImage::toImage(int tileWidth)
         for(int x = 0; x < width; x++, i++)
         {
             int colorIndex = tiled[i];
-            if(!(colorIndex == 0 && col0Transparent))
+            if(colorIndex != 0)
             {
                 QColor c = toRgb24(palette[colorIndex]);
                 out.setPixelColor(x, y, c);
@@ -247,6 +240,12 @@ QVector<u16> QNDSImage::createPalette(const QVector<QColor>& pal, int colorCount
     std::sort(palCopy.begin(), palCopy.end(),
     [max, red, green/*, blue*/](const QColor& c1, const QColor& c2)
     {
+        // Always keep transparent at the start
+        if(c1.alpha() == 0)
+            return true;
+        else if(c2.alpha() == 0)
+            return false;
+
         if (max == red)  // if red is our color that has the widest range
             return c1.red() < c2.red(); // just compare their red channel
         else if (max == green) //...
@@ -291,11 +290,17 @@ inline int QNDSImage::pixelDistance(QColor p1, QColor p2)
     return abs(r1 - r2) + abs(g1 - g2) + abs(b1 - b2) + abs(a1 - a2);
 }
 
-inline int QNDSImage::closestMatch(QColor pixel, const QVector<QColor>& clut)
+inline int QNDSImage::closestMatch(QColor pixel, const QVector<QColor>& clut, int alphaThreshold)
 {
+    // If it's transparency, index 0
+    if(pixel.alpha() < alphaThreshold || pixel == QColor(0xFF, 0x00, 0xFF, 0xFF)) {
+        return 0;
+    }
+
+    // Otherwise find the closest match
     int idx = 0;
     int current_distance = INT_MAX;
-    for (int i = 0; i < clut.size(); ++i)
+    for (int i = 1; i < clut.size(); ++i)
     {
         int dist = pixelDistance(pixel, clut[i]);
         if (dist < current_distance)
