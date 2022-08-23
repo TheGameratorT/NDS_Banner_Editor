@@ -22,9 +22,9 @@ u16 QNDSImage::toRgb15(u32 rgb24)
     g = (rgb24 >> 8) & 0xFF;
     b = (rgb24 >> 0) & 0xFF;
 
-    r = round(r * 31.0 / 255.0);
-    g = round(g * 31.0 / 255.0);
-    b = round(b * 31.0 / 255.0);
+    r = qRound(r * 31.0 / 255.0);
+    g = qRound(g * 31.0 / 255.0);
+    b = qRound(b * 31.0 / 255.0);
 
     return (b << 10) | (g << 5) | r;
 }
@@ -37,9 +37,9 @@ u32 QNDSImage::toRgb24(u16 rgb15)
     g = (rgb15 >> 5) & 0x1F;
     b = (rgb15 >> 10) & 0x1F;
 
-    r = round(r * 255.0 / 31.0);
-    g = round(g * 255.0 / 31.0);
-    b = round(b * 255.0 / 31.0);
+    r = qRound(r * 255.0 / 31.0);
+    g = qRound(g * 255.0 / 31.0);
+    b = qRound(b * 255.0 / 31.0);
 
     return (r << 16) | (g << 8) | b;
 }
