@@ -1,5 +1,5 @@
 # NDS Banner Editor
-A tool to make animated Nintendo DS banners.
+A tool to make Nintendo DS banners.
 
 # Screenshots
 
