@@ -122,7 +122,7 @@ private:
     bool checkIfAllowClose();
     void closeEvent(QCloseEvent *event);
 
-    void loadFile(const QString& path);
+    void loadFile(const QString& path, bool isNew);
 
     void saveFile(const QString& path);
 
