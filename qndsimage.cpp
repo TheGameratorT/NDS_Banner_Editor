@@ -187,19 +187,18 @@ QImage QNDSImage::toImage(int tileWidth)
     const int width = tileWidth * 8;
     const int height = texture.size() / width;
 
-    QImage out(width, height, QImage::Format_ARGB32);
-    out.fill(Qt::transparent);
+    QImage out(width, height, QImage::Format_Indexed8);
+
+    QVector<QRgb> pal;
+    for(u16 color : this->palette)
+        pal.append(0xFF000000 | toRgb24(color));
+    pal[0] &= 0x00FFFFFF; // Make color 0 transparent
+    out.setColorTable(pal);
 
     QVector<u8> tiled = getTiled(tileWidth, false);
     for(int i = 0, y = 0; y < height; y++) {
-        for(int x = 0; x < width; x++, i++)
-        {
-            int colorIndex = tiled[i];
-            if(colorIndex != 0)
-            {
-                QColor c = toRgb24(palette[colorIndex]);
-                out.setPixelColor(x, y, c);
-            }
+        for(int x = 0; x < width; x++, i++) {
+            out.setPixel(x, y, tiled[i]);
         }
     }
 
