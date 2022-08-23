@@ -10,6 +10,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QFile>
+#include <QMimeData>
 #include <QStandardItemModel>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -33,6 +34,8 @@ MainWindow::~MainWindow()
 void MainWindow::setProgramState(ProgramState mode)
 {
     bool closed = mode == ProgramState::Closed;
+
+    this->setAcceptDrops(closed);
 
     ui->gfx_gb->setEnabled(!closed);
     ui->gameTitle_gb->setEnabled(!closed);
@@ -152,6 +155,29 @@ void MainWindow::closeEvent(QCloseEvent *event)
     checkIfAllowClose() ? event->accept() : event->ignore();
 }
 
+void MainWindow::dragEnterEvent(QDragEnterEvent *event)
+{
+    if (event->mimeData()->hasUrls())
+        event->acceptProposedAction();
+}
+
+void MainWindow::dropEvent(QDropEvent *event)
+{
+    const QMimeData *mimeData = event->mimeData();
+
+    if(mimeData->hasUrls())
+    {
+        QStringList paths;
+        QList<QUrl> urls = mimeData->urls();
+
+        // Try to load the dropped files
+        for (int i = 0; i < urls.size() && i < 32; ++i) {
+            if (loadFile(urls[i].toLocalFile(), false))
+                break;
+        }
+    }
+}
+
 /* ======== MENU BAR ACTIONS GROUP ======== */
 
 void MainWindow::on_actionNew_triggered()
@@ -178,17 +204,22 @@ void MainWindow::on_actionOpen_triggered()
     loadFile(fileName, false);
 }
 
-void MainWindow::loadFile(const QString& path, bool isNew)
+bool MainWindow::loadFile(const QString& path, bool isNew)
 {
     QFile file(path);
     if(!file.open(QIODevice::ReadOnly))
     {
         QMessageBox::critical(this, "Big OOF", tr("Could not open file for reading."));
-        return;
+        return false;
     }
 
+    // Check if valid banner.bin size
+    size_t fileSize = file.size();
+    if(fileSize != sizeof(NDSBanner) && fileSize != 0x840 && fileSize != 0x940 && fileSize != 0xA40)
+        return false;
+
     memset(&this->bannerBin, 0, sizeof(NDSBanner));
-    memcpy(&this->bannerBin, file.readAll().data(), file.size());
+    memcpy(&this->bannerBin, file.readAll().data(), fileSize);
     file.close();
 
     /* ======== ICON SETUP ======== */
@@ -225,6 +256,8 @@ void MainWindow::loadFile(const QString& path, bool isNew)
     on_animFrame_cb_currentIndexChanged(0);
 
     setProgramState(isNew ? ProgramState::NewFile : ProgramState::KnowsPath);
+
+    return true;
 }
 
 void MainWindow::saveFile(const QString& path)

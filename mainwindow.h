@@ -121,8 +121,10 @@ private:
 
     bool checkIfAllowClose();
     void closeEvent(QCloseEvent *event);
+    void dragEnterEvent(QDragEnterEvent *event);
+    void dropEvent(QDropEvent* event);
 
-    void loadFile(const QString& path, bool isNew);
+    bool loadFile(const QString& path, bool isNew);
 
     void saveFile(const QString& path);
 
