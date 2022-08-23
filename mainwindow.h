@@ -108,6 +108,7 @@ private:
     QString openedFileName;
     QGraphicsScene gfx_scene;
 
+    QImage getCurrentImage(int bmpID, int palID);
     QPixmap getCurrentPixmap(int bmpID, int palID);
 
     int gfxBmp_lastValue = 0;

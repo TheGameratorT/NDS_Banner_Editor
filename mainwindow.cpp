@@ -92,7 +92,7 @@ void MainWindow::getBinaryIconPtr(u8*& ncg, u16*& ncl, int bmpID, int palID)
     }
 }
 
-QPixmap MainWindow::getCurrentPixmap(int bmpID, int palID)
+QImage MainWindow::getCurrentImage(int bmpID, int palID)
 {
     u8* ncg;
     u16* ncl;
@@ -102,7 +102,12 @@ QPixmap MainWindow::getCurrentPixmap(int bmpID, int palID)
     QVector<u16> nclV = QVector<u16>(ncl, ncl + 0x10);
 
     QNDSImage ndsImg(ncgV, nclV, true);
-    return QPixmap::fromImage(ndsImg.toImage(4));
+    return ndsImg.toImage(4);
+}
+
+QPixmap MainWindow::getCurrentPixmap(int bmpID, int palID)
+{
+    return QPixmap::fromImage(getCurrentImage(bmpID, palID));
 }
 
 void MainWindow::updateIconView(int bmpID, int palID)
@@ -636,7 +641,7 @@ void MainWindow::on_gfxExport_pb_clicked()
 {
     int bmpID = ui->gfxBmp_sb->value() - 1;
     int palID = ui->gfxPal_sb->value() - 1;
-    QPixmap pixmap = getCurrentPixmap(bmpID, palID);
+    QImage image = getCurrentImage(bmpID, palID);
 
     QString fileName = QFileDialog::getSaveFileName(this, "", this->lastDirPath, tr("PNG Files") + " (*.png)");
     if(fileName == "")
@@ -650,6 +655,6 @@ void MainWindow::on_gfxExport_pb_clicked()
         QMessageBox::critical(this, "Big OOF", tr("Could not open file for writing."));
         return;
     }
-    pixmap.save(&file, "PNG");
+    image.save(&file, "PNG");
     file.close();
 }
