@@ -58,9 +58,18 @@ void QNDSImage::replace(const QImage& img, const QVector<u16>& pal, int alphaThr
 
     texture.resize(width * height);
 
-    for (int i = 0, y = 0; y < height; y++)
-        for (int x = 0; x < width; x++, i++)
-            texture[i] = closestMatch(img.pixelColor(x, y), newPal24, alphaThreshold);
+    if(img.depth() == 8 && img.colorCount() <= 16)
+    {
+        for (int i = 0, y = 0; y < height; y++)
+            for (int x = 0; x < width; x++, i++)
+                texture[i] = img.pixelIndex(x, y);
+    }
+    else
+    {
+        for (int i = 0, y = 0; y < height; y++)
+            for (int x = 0; x < width; x++, i++)
+                texture[i] = closestMatch(img.pixelColor(x, y), newPal24, alphaThreshold);
+    }
 
     texture = getTiled(width / 8, true);
 }
@@ -72,14 +81,27 @@ void QNDSImage::replace(const QImage& img, int colorCount, int alphaThreshold)
 
     QVector<QColor> pal;
     pal.append(QColor(0xFF, 0x00, 0xFF, 0x00)); //Make transparent the first color
-    QColor magenta = QColor(0xFF, 0x00, 0xFF, 0xFF);
 
-    for(int y = 0; y < height; y++) {
-        for(int x = 0; x < width; x++)
-        {
-            QColor c = img.pixelColor(x, y);
-            if(!pal.contains(c) && c.alpha() >= alphaThreshold && c != magenta)
-                pal.append(c);
+    if(img.depth() == 8)
+    {
+        // We already have a palette, just use it
+        if(img.colorCount() <= 16) // Valid palette, don't add transparent
+            pal.clear();
+
+        for(const QRgb &color : img.colorTable())
+            pal.append(color);
+    }
+    else
+    {
+        // No palette, get all the colors
+        QColor magenta = QColor(0xFF, 0x00, 0xFF, 0xFF);
+        for(int y = 0; y < height; y++) {
+            for(int x = 0; x < width; x++)
+            {
+                QColor c = img.pixelColor(x, y);
+                if(!pal.contains(c) && c.alpha() >= alphaThreshold && c != magenta)
+                    pal.append(c);
+            }
         }
     }
 
@@ -204,72 +226,70 @@ void QNDSImage::toNitro(QVector<u8>& ncg, QVector<u16>& ncl, bool is4bpp)
     ncl = palette;
 }
 
-QVector<u16> QNDSImage::createPalette(const QVector<QColor>& pal, int colorCount)
+QVector<u16> QNDSImage::createPalette(QVector<QColor> pal, int colorCount)
 {
-    QVector<QColor> palCopy = pal;
-    if(palCopy.size() < 16)
-        palCopy.resize(16);
+    if(pal.size() < colorCount)
+        pal.resize(colorCount);
 
-    // For finding color channel that has the most wide range,
-    // we need to keep their lower and upper bound.
-    int lower_red = palCopy[0].red(),
-        lower_green = palCopy[0].green(),
-        lower_blue = palCopy[0].blue();
-    int upper_red = 0,
-        upper_green = 0,
-        upper_blue = 0;
-
-    // Loop trough all the colors
-    for (QColor c : palCopy)
+    // Sort colors and reduce to needed amount
+    if(pal.size() > colorCount)
     {
-        lower_red = std::min(lower_red, c.red());
-        lower_green = std::min(lower_green, c.green());
-        lower_blue = std::min(lower_blue, c.blue());
+        // For finding color channel that has the most wide range,
+        // we need to keep their lower and upper bound.
+        int lower_red = pal[0].red(),
+            lower_green = pal[0].green(),
+            lower_blue = pal[0].blue();
+        int upper_red = 0,
+            upper_green = 0,
+            upper_blue = 0;
 
-        upper_red = std::max(upper_red, c.red());
-        upper_green = std::max(upper_green, c.green());
-        upper_blue = std::max(upper_blue, c.blue());
+        // Loop trough all the colors
+        for (QColor c : pal)
+        {
+            lower_red = std::min(lower_red, c.red());
+            lower_green = std::min(lower_green, c.green());
+            lower_blue = std::min(lower_blue, c.blue());
+
+            upper_red = std::max(upper_red, c.red());
+            upper_green = std::max(upper_green, c.green());
+            upper_blue = std::max(upper_blue, c.blue());
+        }
+
+        int red = upper_red - lower_red;
+        int green = upper_green - lower_green;
+        int blue = upper_blue - lower_blue;
+        int max = std::max(std::max(red, green), blue);
+
+        // Compare two rgb color according to our selected color channel.
+        std::sort(pal.begin(), pal.end(),
+        [max, red, green/*, blue*/](const QColor& c1, const QColor& c2)
+        {
+            // Always keep transparent at the start
+            if(c1.alpha() == 0)
+                return true;
+            else if(c2.alpha() == 0)
+                return false;
+
+            if (max == red)  // if red is our color that has the widest range
+                return c1.red() < c2.red(); // just compare their red channel
+            else if (max == green) //...
+                return c1.green() < c2.green();
+            else //if (max == blue)
+                return c1.blue() < c2.blue();
+        });
+
+        // Reduce to the desired number of colors
+        double groupSize = pal.size() / colorCount;
+        for (int i = 0; i < colorCount; ++i)
+            palette.append(toRgb15(pal[qRound((groupSize * i) + (groupSize / 2))].rgb()));
     }
-
-    int red = upper_red - lower_red;
-    int green = upper_green - lower_green;
-    int blue = upper_blue - lower_blue;
-    int max = std::max(std::max(red, green), blue);
-
-    // Compare two rgb color according to our selected color channel.
-    std::sort(palCopy.begin(), palCopy.end(),
-    [max, red, green/*, blue*/](const QColor& c1, const QColor& c2)
+    else
     {
-        // Always keep transparent at the start
-        if(c1.alpha() == 0)
-            return true;
-        else if(c2.alpha() == 0)
-            return false;
+        // Already a valid palette, just use it
+        for (int i = 0; i < colorCount; ++i) {
+            palette.append(toRgb15(pal[i].rgb()));
+        }
 
-        if (max == red)  // if red is our color that has the widest range
-            return c1.red() < c2.red(); // just compare their red channel
-        else if (max == green) //...
-            return c1.green() < c2.green();
-        else //if (max == blue)
-            return c1.blue() < c2.blue();
-    });
-
-    QList<QList<QColor>> lists;
-    int listSize = palCopy.size() / colorCount;
-
-    for (int i = 0; i < colorCount; ++i)
-    {
-        QList<QColor> list;
-        for (int j = listSize * i; j < (listSize * i) + listSize; ++j)
-            list.append(palCopy[j]);
-        lists.append(list);
-    }
-
-    QVector<u16> palette;
-    for (QList<QColor> list : lists)
-    {
-        QColor c = list[list.size() / 2];
-        palette.append(toRgb15(c.rgb()));
     }
 
     return palette;
