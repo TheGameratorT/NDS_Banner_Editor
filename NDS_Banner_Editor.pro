@@ -46,8 +46,6 @@ static {
     DEFINES += STATIC
 }
 
-message($$[QT_INSTALL_PREFIX])
-
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /usr/bin

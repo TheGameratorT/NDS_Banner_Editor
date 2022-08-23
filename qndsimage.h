@@ -33,7 +33,7 @@ private:
     int pixelDistance(QColor p1, QColor p2);
     int closestMatch(QColor pixel, const QVector<QColor> &clut, int alphaThreshold);
 
-    QVector<u16> createPalette(const QVector<QColor>& pal, int colorCount);
+    QVector<u16> createPalette(QVector<QColor> pal, int colorCount);
 };
 
 #endif // QNDSIMAGE_H

@@ -395,7 +395,6 @@ void MainWindow::on_gameTitle_pb_clicked()
 
 void MainWindow::on_bannerVersion_cb_currentIndexChanged(int index)
 {
-    printf("=====%d\n", index);
     constexpr int bannerVersions[] = {
         0x0001, // Normal
         0x0002, // Chinese
