@@ -50,3 +50,12 @@ compile_commands.json
 
 # QtCreator local machine specific files for imported projects
 *creator.user*
+
+# Excecutables
+NDS_Banner_Editor
+NDS_Banner_Editor.app
+NDS_Banner_Editor.AppImage
+NDS_Banner_Editor.exe
+
+# OS files
+*.DS_Store

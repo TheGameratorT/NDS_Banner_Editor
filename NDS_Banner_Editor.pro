@@ -33,11 +33,24 @@ FORMS += \
     mainwindow.ui \
     ndsbanneranimplayer.ui
 
-RC_ICONS = icon.ico
+win32 {
+    RC_ICONS = icon.ico
+}
+
+macx {
+    ICON = icon.icns
+}
+
+static {
+    CONFIG += static
+    DEFINES += STATIC
+}
+
+message($$[QT_INSTALL_PREFIX])
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
+else: unix:!android: target.path = /usr/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
