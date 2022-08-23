@@ -122,6 +122,8 @@ private:
     bool checkIfAllowClose();
     void closeEvent(QCloseEvent *event);
 
+    void loadFile(const QString& path);
+
     void saveFile(const QString& path);
 
     void setAnimGroupBlockSignals(bool flag);

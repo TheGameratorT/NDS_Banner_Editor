@@ -156,30 +156,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::on_actionNew_triggered()
 {
-    memset(&this->bannerBin, 0, sizeof(NDSBanner));
-
-    this->bannerBin.version = 0x0103;
-
-    QFile fileNCG(":/resources/icon_ncg.bin");
-    fileNCG.open(QIODevice::ReadOnly);
-
-    QFile fileNCL(":/resources/icon_ncl.bin");
-    fileNCL.open(QIODevice::ReadOnly);
-
-    memcpy(this->bannerBin.iconNCG, fileNCG.readAll().data(), 0x200);
-    memcpy(this->bannerBin.iconNCL, fileNCL.readAll().data(), 0x20);
-
-    fileNCG.close();
-    fileNCL.close();
-
-    QString title = "The crazy smiley quest!\nSmiley Corporation";
-    for(int i = 0; i < 8; i++)
-        memcpy(&this->bannerBin.title[i], title.data(), title.length() * 2);
-
-    updateIconView(-1, -1);
-    on_gameTitle_cb_currentIndexChanged(0);
-
-    setProgramState(ProgramState::NewFile);
+    loadFile(":/resources/default.bin");
 }
 
 void MainWindow::on_actionOpen_triggered()
@@ -198,7 +175,12 @@ void MainWindow::on_actionOpen_triggered()
         return;
     }
 
-    QFile file(fileName);
+    loadFile(fileName);
+}
+
+void MainWindow::loadFile(const QString& path)
+{
+    QFile file(path);
     if(!file.open(QIODevice::ReadOnly))
     {
         QMessageBox::critical(this, "Big OOF", tr("Could not open file for reading."));
