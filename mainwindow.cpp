@@ -7,11 +7,13 @@
 
 #include <QVector>
 #include <QMessageBox>
+#include <QDrag>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QFile>
 #include <QMimeData>
 #include <QStandardItemModel>
+#include <QTemporaryFile>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -36,6 +38,7 @@ void MainWindow::setProgramState(ProgramState mode)
     bool closed = mode == ProgramState::Closed;
 
     this->setAcceptDrops(closed);
+    ui->gfx_gv->setAcceptDrops(!closed);
 
     ui->gfx_gb->setEnabled(!closed);
     ui->gameTitle_gb->setEnabled(!closed);
@@ -609,6 +612,39 @@ void MainWindow::on_gfxImport_pb_clicked()
     QFileInfo fileInfo(fileName);
     this->lastDirPath = fileInfo.dir().path();
 
+    importImage(fileName);
+}
+
+void MainWindow::on_gfxExport_pb_clicked()
+{
+    QImage image = exportImage();
+
+    QString fileName = QFileDialog::getSaveFileName(this, "", this->lastDirPath, tr("PNG Files") + " (*.png)");
+    if(fileName == "")
+        return;
+    QFileInfo fileInfo(fileName);
+    this->lastDirPath = fileInfo.dir().path();
+
+    QFile file(fileName);
+    if(!file.open(QIODevice::WriteOnly))
+    {
+        QMessageBox::critical(this, "Big OOF", tr("Could not open file for writing."));
+        return;
+    }
+    image.save(&file, "PNG");
+    file.close();
+}
+
+bool MainWindow::importImage(const QString &fileName)
+{
+    QImage img(fileName);
+    if(img.width() != 32 || img.height() != 32)
+    {
+        if(img.width() != 0 && img.height() != 0) // Only show error if given a real image
+            QMessageBox::critical(this, tr("faTal mEga eRrOR"), tr("Unfortunately??\nyes, unfortunately, the imported image is not 32x32 pixels."));
+        return false;
+    }
+
     int bmpID = ui->gfxBmp_sb->value() - 1;
     int palID = ui->gfxPal_sb->value() - 1;
 
@@ -622,13 +658,6 @@ void MainWindow::on_gfxImport_pb_clicked()
         QMessageBox::StandardButton btn = QMessageBox::question(this, tr("Palette Replacement"), tr("Do you with to recreate the selected palette?"));
         if(btn == QMessageBox::No)
             newPalette = false;
-    }
-
-    QImage img(fileName);
-    if(img.width() != 32 || img.height() != 32)
-    {
-        QMessageBox::critical(this, tr("faTal mEga eRrOR"), tr("Unfortunately??\nyes, unfortunately, the imported image is not 32x32 pixels."));
-        return;
     }
 
     QNDSImage ndsImg;
@@ -650,26 +679,82 @@ void MainWindow::on_gfxImport_pb_clicked()
     memcpy(ncl, nclV.data(), 0x20);
 
     updateIconView(bmpID, palID);
+
+    return true;
 }
 
-void MainWindow::on_gfxExport_pb_clicked()
+QImage MainWindow::exportImage()
 {
     int bmpID = ui->gfxBmp_sb->value() - 1;
     int palID = ui->gfxPal_sb->value() - 1;
-    QImage image = getCurrentImage(bmpID, palID);
+    return getCurrentImage(bmpID, palID);
+}
 
-    QString fileName = QFileDialog::getSaveFileName(this, "", this->lastDirPath, tr("PNG Files") + " (*.png)");
-    if(fileName == "")
+/* ======== GRAPHICS VIEW ======== */
+
+extern MainWindow *w;
+
+void IconGraphicsView::dragMoveEvent(QDragMoveEvent *event)
+{
+    if (event->mimeData()->hasUrls())
+        event->acceptProposedAction();
+}
+
+void IconGraphicsView::dropEvent(QDropEvent *event)
+{
+    if (!w)
         return;
-    QFileInfo fileInfo(fileName);
-    this->lastDirPath = fileInfo.dir().path();
 
-    QFile file(fileName);
-    if(!file.open(QIODevice::WriteOnly))
+    const QMimeData *mimeData = event->mimeData();
+
+    if(mimeData->hasUrls())
     {
-        QMessageBox::critical(this, "Big OOF", tr("Could not open file for writing."));
-        return;
+        QStringList paths;
+        QList<QUrl> urls = mimeData->urls();
+
+        // Try to load the dropped files
+        for (int i = 0; i < urls.size() && i < 32; ++i) {
+            if (w->importImage(urls[i].toLocalFile()))
+                break;
+        }
     }
-    image.save(&file, "PNG");
-    file.close();
+}
+
+void IconGraphicsView::mousePressEvent(QMouseEvent *event)
+{
+    this->clicked = (event->button() == Qt::LeftButton);
+}
+void IconGraphicsView::mouseReleaseEvent(QMouseEvent *event)
+{
+    (void)event; // ignore event
+    this->clicked = false;
+}
+
+void IconGraphicsView::mouseMoveEvent(QMouseEvent *event)
+{
+    (void)event; // ignore event
+    if (!w || !clicked)
+        return;
+
+    clicked = false; // Prevent double triggering
+
+    QDrag *drag = new QDrag(this);
+
+    QImage image = w->exportImage();
+    QTemporaryFile tempFile;
+    tempFile.setFileTemplate(QDir::tempPath() + "/Export_XXXXXX.png");
+    tempFile.open();
+    image.save(&tempFile, "PNG");
+    tempFile.close();
+
+    QMimeData *mime = new QMimeData;
+
+    connect(mime, SIGNAL(dataRequested(QString)), this, SLOT(createImage(QString)), Qt::DirectConnection);
+
+    mime->setUrls({QUrl(tempFile.fileName())});
+    drag->setMimeData(mime);
+
+    drag->setPixmap(QPixmap::fromImage(image));
+
+    drag->exec(Qt::MoveAction);
 }

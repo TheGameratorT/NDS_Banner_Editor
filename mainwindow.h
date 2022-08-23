@@ -4,7 +4,9 @@
 #include "types.h"
 
 #include <QMainWindow>
+#include <QMimeData>
 #include <QGraphicsScene>
+#include <QGraphicsView>
 
 enum class ProgramState
 {
@@ -50,6 +52,9 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+    bool importImage(const QString &fileName);
+    QImage exportImage();
 
 private slots:
     void on_actionOpen_triggered();
@@ -122,7 +127,7 @@ private:
     bool checkIfAllowClose();
     void closeEvent(QCloseEvent *event);
     void dragEnterEvent(QDragEnterEvent *event);
-    void dropEvent(QDropEvent* event);
+    void dropEvent(QDropEvent *event);
 
     bool loadFile(const QString& path, bool isNew);
 
@@ -131,4 +136,22 @@ private:
     void setAnimGroupBlockSignals(bool flag);
     void setAnimGroupEnabled(bool flag);
 };
+
+class IconGraphicsView : public QGraphicsView
+{
+    bool clicked = false;
+
+protected:
+    void dragMoveEvent(QDragMoveEvent *event);
+    void dropEvent(QDropEvent *event);
+
+    void mousePressEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+public:
+    IconGraphicsView(QWidget *parent = nullptr) : QGraphicsView(parent) {}
+    IconGraphicsView(QGraphicsScene *scene, QWidget *parent = nullptr) : QGraphicsView(scene, parent) {}
+
+};
+
 #endif // MAINWINDOW_H
