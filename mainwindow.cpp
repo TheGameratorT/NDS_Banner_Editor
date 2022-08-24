@@ -193,22 +193,26 @@ void MainWindow::on_actionOpen_triggered()
     QString fileName = QFileDialog::getOpenFileName(this, "", this->lastDirPath, tr("Banner Files") + " (*.bin)");
     if(fileName == "")
         return;
-    this->openedFileName = fileName;
-
-    QFileInfo fileInfo(fileName);
-    this->lastDirPath = fileInfo.dir().path();
-
-    if(fileInfo.size() != sizeof(NDSBanner) && fileInfo.size() != 0x840 && fileInfo.size() != 0x940 && fileInfo.size() != 0xA40)
-    {
-        QMessageBox::information(this, tr("Oops!"), tr("Invalid banner size.\nMake sure this is a valid banner file."));
-        return;
-    }
 
     loadFile(fileName, false);
 }
 
 bool MainWindow::loadFile(const QString& path, bool isNew)
 {
+    if(!isNew)
+    {
+        this->openedFileName = path;
+
+        QFileInfo fileInfo(path);
+        this->lastDirPath = fileInfo.dir().path();
+
+        if(fileInfo.size() != sizeof(NDSBanner) && fileInfo.size() != 0x840 && fileInfo.size() != 0x940 && fileInfo.size() != 0xA40)
+        {
+            QMessageBox::information(this, tr("Oops!"), tr("Invalid banner size.\nMake sure this is a valid banner file."));
+            return false;
+        }
+    }
+
     QFile file(path);
     if(!file.open(QIODevice::ReadOnly))
     {
@@ -224,6 +228,8 @@ bool MainWindow::loadFile(const QString& path, bool isNew)
     memset(&this->bannerBin, 0, sizeof(NDSBanner));
     memcpy(&this->bannerBin, file.readAll().data(), fileSize);
     file.close();
+
+    setProgramState(isNew ? ProgramState::NewFile : ProgramState::KnowsPath);
 
     /* ======== ICON SETUP ======== */
 
@@ -257,8 +263,6 @@ bool MainWindow::loadFile(const QString& path, bool isNew)
     if(this->bannerBin.animData[0].frameDuration)
         setAnimGroupEnabled(true);
     on_animFrame_cb_currentIndexChanged(0);
-
-    setProgramState(isNew ? ProgramState::NewFile : ProgramState::KnowsPath);
 
     return true;
 }
