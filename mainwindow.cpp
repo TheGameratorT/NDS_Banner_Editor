@@ -199,8 +199,6 @@ void MainWindow::on_actionOpen_triggered()
 
 bool MainWindow::loadFile(const QString& path, bool isNew)
 {
-    setProgramState(isNew ? ProgramState::NewFile : ProgramState::KnowsPath);
-
     if(!isNew)
     {
         this->openedFileName = path;
@@ -230,6 +228,8 @@ bool MainWindow::loadFile(const QString& path, bool isNew)
     memset(&this->bannerBin, 0, sizeof(NDSBanner));
     memcpy(&this->bannerBin, file.readAll().data(), fileSize);
     file.close();
+
+    setProgramState(isNew ? ProgramState::NewFile : ProgramState::KnowsPath);
 
     /* ======== ICON SETUP ======== */
 
