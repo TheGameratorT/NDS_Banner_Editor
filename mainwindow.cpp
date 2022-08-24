@@ -212,7 +212,7 @@ bool MainWindow::loadFile(const QString& path, bool isNew)
     QFile file(path);
     if(!file.open(QIODevice::ReadOnly))
     {
-        QMessageBox::critical(this, "Big OOF", tr("Could not open file for reading."));
+        QMessageBox::critical(this, tr("Big OOF"), tr("Could not open file for reading."));
         return false;
     }
 
@@ -250,7 +250,7 @@ bool MainWindow::loadFile(const QString& path, bool isNew)
     {
         NDSBanner::AnimSeq* animData = &this->bannerBin.animData[i];
         if(animData->frameDuration)
-            ui->animFrame_cb->addItem(tr("Frame ") + QString::number(i + 1));
+            ui->animFrame_cb->addItem(tr("Frame %0").arg(i + 1));
         else
             break;
     }
@@ -268,7 +268,7 @@ void MainWindow::saveFile(const QString& path)
     QFile file(path);
     if(!file.open(QIODevice::WriteOnly))
     {
-        QMessageBox::critical(this, "Big OOF", tr("Could not open file for writing."));
+        QMessageBox::critical(this, tr("Big OOF"), tr("Could not open file for writing."));
         return;
     }
 
@@ -325,16 +325,19 @@ void MainWindow::on_actionClose_triggered()
 
 void MainWindow::on_actionCredits_triggered()
 {
-    QMessageBox::about(this, tr("About"), R"(<p><strong>Nintendo DS Banner Editor</strong></p>
-<p>Copyright &copy; 2020 TheGameratorT</p>
-<p><span style="text-decoration: underline;">Special thanks:</span></p>
-<p style="padding-left: 30px;">Banner format research by <a href="https://problemkaputt.de/gbatek-ds-cartridge-icon-title.htm">GBATEK<br /></a>Image conversion by <a href="https://github.com/Ed-1T">Ed_IT</a></p>
-<p><span style="text-decoration: underline;">License:</span></p>
-<p style="padding-left: 30px;">This application is licensed under the GNU General Public License v3.</p>
-<p style="padding-left: 30px;">This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.</p>
-<p style="padding-left: 30px;">This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.<br />See the GNU General Public License for more details.</p>
-<p style="padding-left: 30px;">For details read the LICENSE file bundled with the program or visit:</p>
-<p style="padding-left: 30px;"><a href="https://www.gnu.org/licenses/">https://www.gnu.org/licenses/</a></p>)");
+    QString bodyText = "<p><string>" + tr("Nintendo DS Banner Editor") + "</strong></p>"
+        + "<p>" + tr("Copyright &copy; 2020 TheGameratorT") + "</p>"
+        + R"(<p><span style="text-decoration: underline;">)" + tr("Special thanks:") + "</span></p>"
+        + R"(<p style="padding-left: 30px;">)" + tr(R"(Banner format research by <a href="https://problemkaputt.de/gbatek-ds-cartridge-icon-title.htm">GBATEK</a>)") + "<br />"
+        + tr(R"(Image conversion by <a href="https://github.com/Ed-1T">Ed_IT</a>)") + "</p>"
+        + R"(<p><span style="text-decoration: underline;">)" + tr("License:") + "</span></p>"
+        + R"(<p style="padding-left: 30px;">This application is licensed under the GNU General Public License v3.</p>)"
+        + R"(<p style="padding-left: 30px;">This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.</p>)"
+        + R"(<p style="padding-left: 30px;">This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.<br />See the GNU General Public License for more details.</p>)"
+        + R"(<p style="padding-left: 30px;">For details read the LICENSE file bundled with the program or visit:</p>)"
+        + R"(<p style="padding-left: 30px;"><a href="https://www.gnu.org/licenses/">https://www.gnu.org/licenses/</a></p>)";
+
+    QMessageBox::about(this, tr("About NDS Banner Editor"), bodyText);
 }
 
 void MainWindow::on_actionQt_triggered()
@@ -516,7 +519,7 @@ void MainWindow::on_animFrameAdd_pb_clicked()
     int index = ui->animFrame_cb->count();
     if(index != 64)
     {
-        ui->animFrame_cb->addItem(tr("Frame ") + QString::number(index + 1));
+        ui->animFrame_cb->addItem(tr("Frame %0").arg(index + 1));
 
         NDSBanner::AnimSeq* animData = &this->bannerBin.animData[index];
         animData->frameDuration = 1;
@@ -542,7 +545,7 @@ void MainWindow::on_animFrameRem_pb_clicked()
     {
         for(int i = index; i < new_count; i++)
         {
-            ui->animFrame_cb->setItemText(i, tr("Frame ") + QString::number(i + 1));
+            ui->animFrame_cb->setItemText(i, tr("Frame %0").arg(i + 1));
             this->bannerBin.animData[i] = this->bannerBin.animData[i + 1];
         }
 
