@@ -21,6 +21,8 @@ jobs:
         cp NDS_Banner_Editor.desktop appdir/usr/share/applications
         cp icon.png appdir/usr/share/icons/hicolor/32x32/NDS_Banner_Editor.png
 
+        mkdir -p resources/i18n
+        lrelease NDS_Banner_Editor.pro && mv i18n/*.qm resources/i18n
         qmake -config release
         make -j$(nproc)
         make INSTALL_ROOT=appdir -j$(nproc) install
@@ -51,6 +53,8 @@ jobs:
       uses: jurplel/install-qt-action@v3
     - name: make
       run: |
+        mkdir -p resources/i18n
+        lrelease NDS_Banner_Editor.pro && mv i18n/*.qm resources/i18n
         qmake -config release
         make -j$(sysctl -n hw.ncpu)
         macdeployqt NDS_Banner_Editor.app -dmg
@@ -91,6 +95,8 @@ jobs:
       run: pacman -S --noconfirm mingw-w64-${{ matrix.msys2-arch }}-{gcc,make,qt5-static}
     - name: make
       run: |
+        mkdir -p resources/i18n
+        /${{ matrix.mingw-arch }}/qt5-static/bin/lrelease NDS_Banner_Editor.pro && mv i18n/*.qm resources/i18n
         /${{ matrix.mingw-arch }}/qt5-static/bin/qmake.exe -config release -config static
         mingw32-make.exe
         cd release

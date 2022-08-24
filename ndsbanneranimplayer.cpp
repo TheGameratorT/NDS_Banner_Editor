@@ -76,9 +76,9 @@ void NDSBannerAnimPlayer::window_shown()
 void NDSBannerAnimPlayer::updateProgress()
 {
     ui->statusLabel->setText(
-                tr("Frame ") + QString::number(this->currentFrame + 1) + " / " + QString::number(this->frameCount)
-                + "  |  " +
-                tr("Tick ") + QString::number(this->currentTick + 1) + " / " + QString::number(this->tickCount));
+            tr("Frame %0 / %1 | Tick %2 / %3")
+                .arg(this->currentFrame + 1).arg(this->frameCount)
+                .arg(this->currentTick + 1).arg(this->tickCount));
     ui->progressBar->setValue(this->currentTick + 1);
 
     ui->frame_sb->setValue(this->currentFrame + 1);
