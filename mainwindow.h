@@ -56,53 +56,33 @@ public:
     bool importImage(const QString &fileName);
     QImage exportImage();
 
+    int getSelectedBitmapID();
+    int getSelectedPaletteID();
+
 private slots:
     void on_actionOpen_triggered();
-
     void on_gameTitle_pte_textChanged();
-
     void on_gameTitle_cb_currentIndexChanged(int index);
-
     void on_gameTitle_pb_clicked();
-
     void on_bannerVersion_cb_currentIndexChanged(int index);
-
     void on_actionSave_triggered();
-
     void on_actionSave_As_triggered();
-
     void on_actionCredits_triggered();
-
     void on_actionQt_triggered();
-
     void on_gfxBmp_sb_valueChanged(int arg1);
-
     void on_gfxPal_sb_valueChanged(int arg1);
-
     void on_actionClose_triggered();
-
     void on_animFrame_cb_currentIndexChanged(int index);
-
     void on_animFrameAdd_pb_clicked();
-
     void on_animFrameRem_pb_clicked();
-
     void on_animDur_sb_valueChanged(int arg1);
-
     void on_animBmp_sb_valueChanged(int arg1);
-
     void on_animPal_sb_valueChanged(int arg1);
-
     void on_animFlipX_cb_stateChanged(int arg1);
-
     void on_animFlipY_cb_stateChanged(int arg1);
-
     void on_actionNew_triggered();
-
     void on_actionAnimation_Player_triggered();
-
     void on_gfxImport_pb_clicked();
-
     void on_gfxExport_pb_clicked();
 
 private:
@@ -130,7 +110,6 @@ private:
     void dropEvent(QDropEvent *event);
 
     bool loadFile(const QString& path, bool isNew);
-
     void saveFile(const QString& path);
 
     void setAnimGroupBlockSignals(bool flag);
@@ -139,7 +118,9 @@ private:
 
 class IconGraphicsView : public QGraphicsView
 {
-    bool clicked = false;
+public:
+    IconGraphicsView(QWidget *parent = nullptr) : QGraphicsView(parent) {}
+    IconGraphicsView(QGraphicsScene *scene, QWidget *parent = nullptr) : QGraphicsView(scene, parent) {}
 
 protected:
     void dragMoveEvent(QDragMoveEvent *event);
@@ -148,10 +129,9 @@ protected:
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
-public:
-    IconGraphicsView(QWidget *parent = nullptr) : QGraphicsView(parent) {}
-    IconGraphicsView(QGraphicsScene *scene, QWidget *parent = nullptr) : QGraphicsView(scene, parent) {}
 
+private:
+    bool clicked = false;
 };
 
 #endif // MAINWINDOW_H

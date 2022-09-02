@@ -5,7 +5,7 @@
     <name>MainWindow</name>
     <message>
         <location filename="../mainwindow.ui" line="14"/>
-        <location filename="../mainwindow.cpp" line="328"/>
+        <location filename="../mainwindow.cpp" line="335"/>
         <source>Nintendo DS Banner Editor</source>
         <translation>ニンテンドーDSバナーエディター</translation>
     </message>
@@ -199,7 +199,7 @@
     <message>
         <location filename="../mainwindow.ui" line="434"/>
         <source>&amp;Qt</source>
-        <translation>Qtについて (&amp;Q)</translation>
+        <translation>&amp;Qtについて</translation>
     </message>
     <message>
         <location filename="../mainwindow.ui" line="439"/>
@@ -207,126 +207,131 @@
         <translation>アニメのプレイヤー (&amp;A)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="148"/>
-        <location filename="../mainwindow.cpp" line="405"/>
+        <location filename="../mainwindow.cpp" line="149"/>
+        <location filename="../mainwindow.cpp" line="414"/>
         <source>You sure?</source>
         <translation>よろしいですか？</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="148"/>
+        <location filename="../mainwindow.cpp" line="149"/>
         <source>There are unsaved changes!
 Are you sure you want to close?</source>
         <translation>保存されていない編集があります！
 本当に閉じる？</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="193"/>
-        <location filename="../mainwindow.cpp" line="305"/>
+        <location filename="../mainwindow.cpp" line="194"/>
+        <location filename="../mainwindow.cpp" line="312"/>
         <source>Banner Files</source>
         <translation>バナーファイル</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="203"/>
-        <location filename="../mainwindow.cpp" line="606"/>
+        <location filename="../mainwindow.cpp" line="212"/>
+        <location filename="../mainwindow.cpp" line="615"/>
         <source>Oops!</source>
         <translation>おっと！</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="203"/>
+        <location filename="../mainwindow.cpp" line="212"/>
         <source>Invalid banner size.
 Make sure this is a valid banner file.</source>
         <translation>バナーサイズは無効です。
 これが有効なバナーであることを確認してください。</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="215"/>
+        <location filename="../mainwindow.cpp" line="220"/>
         <source>Could not open file for reading.</source>
         <translation>ファイルを読み込みで開かない。</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="215"/>
-        <location filename="../mainwindow.cpp" line="271"/>
+        <location filename="../mainwindow.cpp" line="220"/>
+        <location filename="../mainwindow.cpp" line="278"/>
         <source>Big OOF</source>
         <translation>大ミス</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="271"/>
-        <location filename="../mainwindow.cpp" line="634"/>
+        <location filename="../mainwindow.cpp" line="278"/>
+        <location filename="../mainwindow.cpp" line="643"/>
         <source>Could not open file for writing.</source>
         <translation>ファイルを書き込みで開かない。</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="329"/>
-        <source>Copyright &amp;copy; 2020 TheGameratorT</source>
-        <translation>著作権 &amp;copy; 2020 TheGameratorT</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="330"/>
+        <location filename="../mainwindow.cpp" line="337"/>
         <source>Special thanks:</source>
         <translation>特別な感謝：</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="331"/>
+        <location filename="../mainwindow.cpp" line="339"/>
         <source>Banner format research by &lt;a href=&quot;https://problemkaputt.de/gbatek-ds-cartridge-icon-title.htm&quot;&gt;GBATEK&lt;/a&gt;</source>
         <translation>&lt;a href=&quot;https://problemkaputt.de/gbatek-ds-cartridge-icon-title.htm&quot;&gt;GBATEK&lt;/a&gt;によるバナーフォーマット調査</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="332"/>
+        <location filename="../mainwindow.cpp" line="340"/>
         <source>Image conversion by &lt;a href=&quot;https://github.com/Ed-1T&quot;&gt;Ed_IT&lt;/a&gt;</source>
         <translation>&lt;a href=&quot;https://github.com/Ed-1T&quot;&gt;Ed_IT&lt;/a&gt;による画像変換</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="405"/>
+        <location filename="../mainwindow.cpp" line="341"/>
+        <source>Development contribution and Japanese translation by &lt;a href=&quot;https://github.com/Epicpkmn11&quot;&gt;Epicpkmn11&lt;/a&gt;</source>
+        <translation>&lt;a href=&quot;https://github.com/Epicpkmn11&quot;&gt;Epicpkmn11&lt;/a&gt;による開発貢献と日本語訳</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="414"/>
         <source>Do you really want to replace all language titles with the current one?</source>
         <translation>全ての言語のタイトルを現在のタイトルに置き換えてよろしいですか？</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="606"/>
+        <location filename="../mainwindow.cpp" line="615"/>
         <source>This banner has no frames yet.</source>
         <translation>このバナーにはフレームがありません。</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="612"/>
-        <location filename="../mainwindow.cpp" line="625"/>
+        <location filename="../mainwindow.cpp" line="621"/>
+        <location filename="../mainwindow.cpp" line="634"/>
         <source>PNG Files</source>
         <translation>PNGファイル</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="647"/>
+        <location filename="../mainwindow.cpp" line="656"/>
         <source>faTal mEga eRrOR</source>
         <translation>致命的な超エラー</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="647"/>
+        <location filename="../mainwindow.cpp" line="656"/>
         <source>Unfortunately??
 yes, unfortunately, the imported image is not 32x32 pixels.</source>
         <translation>残念らがらか…
 はい。残念ながら、インポートされた画像は32×32ピクセルではありません。</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="661"/>
+        <location filename="../mainwindow.cpp" line="670"/>
         <source>Palette Replacement</source>
         <translation>パレットの置き換える</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="661"/>
+        <location filename="../mainwindow.cpp" line="670"/>
         <source>Do you with to recreate the selected palette?</source>
         <translation>選択されたパレットを再作成しますか？</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="333"/>
+        <location filename="../mainwindow.cpp" line="342"/>
         <source>License:</source>
         <translation>ライセンス：</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="253"/>
-        <location filename="../mainwindow.cpp" line="522"/>
-        <location filename="../mainwindow.cpp" line="548"/>
+        <location filename="../mainwindow.cpp" line="262"/>
+        <location filename="../mainwindow.cpp" line="531"/>
+        <location filename="../mainwindow.cpp" line="557"/>
         <source>Frame %0</source>
         <translation>フレーム第%0個</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="340"/>
+        <location filename="../mainwindow.cpp" line="336"/>
+        <source>Copyright &amp;copy; 2022 TheGameratorT</source>
+        <translation>著作権 &amp;copy; 2022 TheGameratorT</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="349"/>
         <source>About NDS Banner Editor</source>
         <translation>NDS Banner Editorについて</translation>
     </message>

@@ -140,7 +140,8 @@ bool MainWindow::checkIfAllowClose()
         else
             bannerSize = 0x840;
 
-        bool isDifferent = memcmp(openFile.readAll().data(), &this->bannerBin, bannerSize);
+        QByteArray fileData = openFile.readAll();
+        bool isDifferent = memcmp(fileData.data(), &this->bannerBin, bannerSize);
         openFile.close();
 
         if(isDifferent)
@@ -225,8 +226,10 @@ bool MainWindow::loadFile(const QString& path, bool isNew)
     if(fileSize != sizeof(NDSBanner) && fileSize != 0x840 && fileSize != 0x940 && fileSize != 0xA40)
         return false;
 
+    QByteArray fileData = file.readAll();
+
     memset(&this->bannerBin, 0, sizeof(NDSBanner));
-    memcpy(&this->bannerBin, file.readAll().data(), fileSize);
+    memcpy(&this->bannerBin, fileData.data(), fileSize);
     file.close();
 
     setProgramState(isNew ? ProgramState::NewFile : ProgramState::KnowsPath);
@@ -330,10 +333,12 @@ void MainWindow::on_actionClose_triggered()
 void MainWindow::on_actionCredits_triggered()
 {
     QString bodyText = "<p><string>" + tr("Nintendo DS Banner Editor") + "</strong></p>"
-        + "<p>" + tr("Copyright &copy; 2020 TheGameratorT") + "</p>"
+        + "<p>" + tr("Copyright &copy; 2022 TheGameratorT") + "</p>"
         + R"(<p><span style="text-decoration: underline;">)" + tr("Special thanks:") + "</span></p>"
-        + R"(<p style="padding-left: 30px;">)" + tr(R"(Banner format research by <a href="https://problemkaputt.de/gbatek-ds-cartridge-icon-title.htm">GBATEK</a>)") + "<br />"
-        + tr(R"(Image conversion by <a href="https://github.com/Ed-1T">Ed_IT</a>)") + "</p>"
+        + R"(<p style="padding-left: 30px;">)"
+        + tr(R"(Banner format research by <a href="https://problemkaputt.de/gbatek-ds-cartridge-icon-title.htm">GBATEK</a>)") + "<br />"
+        + tr(R"(Image conversion by <a href="https://github.com/Ed-1T">Ed_IT</a>)") + "<br />"
+        + tr(R"(Development contribution and Japanese translation by <a href="https://github.com/Epicpkmn11">Epicpkmn11</a>)") + "</p>"
         + R"(<p><span style="text-decoration: underline;">)" + tr("License:") + "</span></p>"
         + R"(<p style="padding-left: 30px;">This application is licensed under the GNU General Public License v3.</p>)"
         + R"(<p style="padding-left: 30px;">This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.</p>)"
@@ -697,6 +702,16 @@ QImage MainWindow::exportImage()
     return getCurrentImage(bmpID, palID);
 }
 
+int MainWindow::getSelectedBitmapID()
+{
+    return ui->gfxBmp_sb->value();
+}
+
+int MainWindow::getSelectedPaletteID()
+{
+    return ui->gfxPal_sb->value();
+}
+
 /* ======== GRAPHICS VIEW ======== */
 
 extern MainWindow *w;
@@ -716,7 +731,6 @@ void IconGraphicsView::dropEvent(QDropEvent *event)
 
     if(mimeData->hasUrls())
     {
-        QStringList paths;
         QList<QUrl> urls = mimeData->urls();
 
         // Try to load the dropped files
@@ -745,23 +759,26 @@ void IconGraphicsView::mouseMoveEvent(QMouseEvent *event)
 
     clicked = false; // Prevent double triggering
 
-    QDrag *drag = new QDrag(this);
-
     QImage image = w->exportImage();
-    QTemporaryFile tempFile;
-    tempFile.setFileTemplate(QDir::tempPath() + "/Export_XXXXXX.png");
-    tempFile.open();
+    int bmpID = w->getSelectedBitmapID();
+    int palID = w->getSelectedPaletteID();
+
+    QString tempFileName = QDir::tempPath() + "/BannerIcon_BMP" + QString::number(bmpID) + "_PAL" + QString::number(palID) + ".png";
+    QFile tempFile(tempFileName);
+    if (!tempFile.open(QIODevice::WriteOnly))
+        return;
     image.save(&tempFile, "PNG");
     tempFile.close();
 
-    QMimeData *mime = new QMimeData;
+    QDrag* drag = new QDrag(this);
+    QMimeData* mimeData = new QMimeData;
 
-    connect(mime, SIGNAL(dataRequested(QString)), this, SLOT(createImage(QString)), Qt::DirectConnection);
+    mimeData->setUrls({QUrl::fromLocalFile(tempFileName)});
 
-    mime->setUrls({QUrl(tempFile.fileName())});
-    drag->setMimeData(mime);
-
+    drag->setMimeData(mimeData);
     drag->setPixmap(QPixmap::fromImage(image));
 
-    drag->exec(Qt::MoveAction);
+    Qt::DropAction dropAction = drag->exec(Qt::MoveAction);
+    if(dropAction == Qt::IgnoreAction)
+        tempFile.remove();
 }
