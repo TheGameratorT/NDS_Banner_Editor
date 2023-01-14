@@ -14,6 +14,13 @@
 #include <QMimeData>
 #include <QStandardItemModel>
 #include <QTemporaryFile>
+#include <QTranslator>
+#include <QSettings>
+
+extern QTranslator *translator;
+extern bool translationLoaded;
+
+static const char* NameForTranslation[] = { "en", "ja" };
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -26,6 +33,14 @@ MainWindow::MainWindow(QWidget *parent)
     this->lastDirPath = QDir::homePath();
 
     setProgramState(ProgramState::Closed);
+
+    QSettings settings;
+    bool langOk;
+    int language = settings.value("language", 0).toInt(&langOk);
+    if (langOk)
+        changeLanguage(language);
+    else
+        settings.setValue("language", 0);
 }
 
 MainWindow::~MainWindow()
@@ -82,6 +97,22 @@ void MainWindow::setProgramState(ProgramState mode)
 
     ui->gfxPal_sb->setEnabled(false);
 
+}
+
+void MainWindow::changeLanguage(int language)
+{
+    if (translationLoaded)
+        QApplication::removeTranslator(translator);
+    if (language != 0) // if not English
+    {
+        if (translator->load(QLocale(NameForTranslation[language]), QLatin1String("nbe"), QLatin1String("_"), QLatin1String(":/resources/i18n")))
+        {
+            QApplication::installTranslator(translator);
+            translationLoaded = true;
+        }
+    }
+    QSettings settings;
+    settings.setValue("language", language);
 }
 
 void MainWindow::getBinaryIconPtr(u8*& ncg, u16*& ncl, int bmpID, int palID)
@@ -179,6 +210,14 @@ void MainWindow::dropEvent(QDropEvent *event)
             if (loadFile(urls[i].toLocalFile(), false))
                 break;
         }
+    }
+}
+
+void MainWindow::changeEvent(QEvent *event)
+{
+    if(QEvent::LanguageChange == event->type())
+    {
+        ui->retranslateUi(this);
     }
 }
 
@@ -352,6 +391,16 @@ void MainWindow::on_actionCredits_triggered()
 void MainWindow::on_actionQt_triggered()
 {
     QMessageBox::aboutQt(this);
+}
+
+void MainWindow::on_actionEnglish_triggered()
+{
+    changeLanguage(0);
+}
+
+void MainWindow::on_actionJapanese_triggered()
+{
+    changeLanguage(1);
 }
 
 /* ======== ICON/GRAPHICS GROUP ======== */

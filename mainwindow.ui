@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>740</width>
-    <height>509</height>
+    <height>533</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -352,7 +352,7 @@
      <x>0</x>
      <y>0</y>
      <width>740</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -380,8 +380,16 @@
     </property>
     <addaction name="actionAnimation_Player"/>
    </widget>
+   <widget class="QMenu" name="menuLanguage">
+    <property name="title">
+     <string>Language</string>
+    </property>
+    <addaction name="actionEnglish"/>
+    <addaction name="actionJapanese"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuExtra"/>
+   <addaction name="menuLanguage"/>
    <addaction name="menuAbout"/>
   </widget>
   <action name="actionOpen">
@@ -440,6 +448,16 @@
    </property>
    <property name="shortcut">
     <string notr="true">Ctrl+P</string>
+   </property>
+  </action>
+  <action name="actionEnglish">
+   <property name="text">
+    <string notr="true">English</string>
+   </property>
+  </action>
+  <action name="actionJapanese">
+   <property name="text">
+    <string notr="true">日本語</string>
    </property>
   </action>
  </widget>

@@ -5,14 +5,17 @@
 #include <QtGlobal>
 
 MainWindow *w;
+QTranslator *translator;
+bool translationLoaded = false;
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    QTranslator t;
-    if (t.load(QLocale(), QLatin1String("nbe"), QLatin1String("_"), QLatin1String(":/resources/i18n")))
-        a.installTranslator(&t);
+    QCoreApplication::setOrganizationName("TheGameratorT");
+    QCoreApplication::setApplicationName("NDS_Banner_Editor");
+
+    translator = new QTranslator(&a);
 
     w = new MainWindow();
     w->show();

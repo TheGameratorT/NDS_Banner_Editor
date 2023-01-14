@@ -84,6 +84,8 @@ private slots:
     void on_actionAnimation_Player_triggered();
     void on_gfxImport_pb_clicked();
     void on_gfxExport_pb_clicked();
+    void on_actionEnglish_triggered();
+    void on_actionJapanese_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -100,6 +102,7 @@ private:
     int animFrame_lastSize = 0;
 
     void setProgramState(ProgramState mode);
+    void changeLanguage(int language);
 
     void getBinaryIconPtr(u8*& ncg, u16*& ncl, int bmpID, int palID);
     void updateIconView(int bmpID, int ncgID);
@@ -108,6 +111,7 @@ private:
     void closeEvent(QCloseEvent *event);
     void dragEnterEvent(QDragEnterEvent *event);
     void dropEvent(QDropEvent *event);
+    void changeEvent(QEvent *event);
 
     bool loadFile(const QString& path, bool isNew);
     void saveFile(const QString& path);
