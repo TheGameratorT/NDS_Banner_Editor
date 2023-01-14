@@ -38,9 +38,15 @@ MainWindow::MainWindow(QWidget *parent)
     bool langOk;
     int language = settings.value("language", 0).toInt(&langOk);
     if (langOk)
+    {
+        if (language < 0 || language > sizeof(NameForTranslation) / sizeof(char*))
+            language = 0;
         changeLanguage(language);
+    }
     else
+    {
         settings.setValue("language", 0);
+    }
 }
 
 MainWindow::~MainWindow()
