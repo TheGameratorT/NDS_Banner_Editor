@@ -2,5 +2,6 @@
 <qresource>
     <file>resources/default.bin</file>
     <file>resources/i18n/nbe_ja.qm</file>
+    <file>resources/i18n/nbe_pt.qm</file>
 </qresource>
 </RCC>
