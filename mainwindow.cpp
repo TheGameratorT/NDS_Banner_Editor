@@ -333,7 +333,7 @@ void MainWindow::on_actionClose_triggered()
 void MainWindow::on_actionCredits_triggered()
 {
     QString bodyText = "<p><string>" + tr("Nintendo DS Banner Editor") + "</strong></p>"
-        + "<p>" + tr("Copyright &copy; 2022 TheGameratorT") + "</p>"
+        + "<p>" + tr("Copyright &copy; 2020-2023 TheGameratorT") + "</p>"
         + R"(<p><span style="text-decoration: underline;">)" + tr("Special thanks:") + "</span></p>"
         + R"(<p style="padding-left: 30px;">)"
         + tr(R"(Banner format research by <a href="https://problemkaputt.de/gbatek-ds-cartridge-icon-title.htm">GBATEK</a>)") + "<br />"

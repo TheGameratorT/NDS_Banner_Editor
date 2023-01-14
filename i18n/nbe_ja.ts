@@ -256,6 +256,11 @@ Make sure this is a valid banner file.</source>
         <translation>ファイルを書き込みで開かない。</translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="336"/>
+        <source>Copyright &amp;copy; 2020-2023 TheGameratorT</source>
+        <translation>著作権 &amp;copy; 2020-2023 TheGameratorT</translation>
+    </message>
+    <message>
         <location filename="../mainwindow.cpp" line="337"/>
         <source>Special thanks:</source>
         <translation>特別な感謝：</translation>
@@ -324,11 +329,6 @@ yes, unfortunately, the imported image is not 32x32 pixels.</source>
         <location filename="../mainwindow.cpp" line="557"/>
         <source>Frame %0</source>
         <translation>フレーム第%0個</translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="336"/>
-        <source>Copyright &amp;copy; 2022 TheGameratorT</source>
-        <translation>著作権 &amp;copy; 2022 TheGameratorT</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="349"/>
