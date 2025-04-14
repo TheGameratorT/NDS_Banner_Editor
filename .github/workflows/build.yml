@@ -31,10 +31,13 @@ jobs:
         make -j$(nproc)
         make INSTALL_ROOT=appdir -j$(nproc) install
 
-        curl -o linuxdeployqt -L https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
-        chmod a+x linuxdeployqt
+        curl -o linuxdeploy -L https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+        chmod a+x linuxdeploy
 
-        ./linuxdeployqt appdir/usr/share/applications/NDS_Banner_Editor.desktop -appimage
+        curl -o linuxdeploy-plugin-qt-x86_64.AppImage -L https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+        chmod a+x linuxdeploy-plugin-qt-x86_64.AppImage
+
+        NO_STRIP=true ./linuxdeploy --appdir appdir --desktop-file appdir/usr/share/applications/NDS_Banner_Editor.desktop --output appimage --plugin qt
         mv NDS_Banner_Editor-*-x86_64.AppImage NDS_Banner_Editor.AppImage
         tar -cf NDS_Banner_Editor_Linux_x64.tar NDS_Banner_Editor.AppImage
     - name: Upload artifact
