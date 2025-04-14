@@ -10,16 +10,16 @@ on:
 
 jobs:
   linux:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
     - name: make
       run: |
-        mkdir -p appdir/usr/share/{applications,icons/hicolor/32x32}
+        mkdir -p appdir/usr/share/{applications,icons/hicolor/32x32/apps}
         cp NDS_Banner_Editor.desktop appdir/usr/share/applications
-        cp icon.png appdir/usr/share/icons/hicolor/32x32/NDS_Banner_Editor.png
+        cp icon.png appdir/usr/share/icons/hicolor/32x32/apps/NDS_Banner_Editor.png
 
         mkdir -p resources/i18n
         lrelease NDS_Banner_Editor.pro && mv i18n/*.qm resources/i18n
