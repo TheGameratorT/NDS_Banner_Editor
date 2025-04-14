@@ -38,7 +38,7 @@ jobs:
         chmod a+x linuxdeploy-plugin-qt-x86_64.AppImage
 
         NO_STRIP=true ./linuxdeploy --appdir appdir --desktop-file appdir/usr/share/applications/NDS_Banner_Editor.desktop --output appimage --plugin qt
-        mv NDS_Banner_Editor-*-x86_64.AppImage NDS_Banner_Editor.AppImage
+        mv NDS_Banner_Editor-x86_64.AppImage NDS_Banner_Editor.AppImage
         tar -cf NDS_Banner_Editor_Linux_x64.tar NDS_Banner_Editor.AppImage
     - name: Upload artifact
       uses: actions/upload-artifact@v4
