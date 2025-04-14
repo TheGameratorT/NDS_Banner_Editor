@@ -12,7 +12,7 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
     - name: make
@@ -34,7 +34,7 @@ jobs:
         mv NDS_Banner_Editor-*-x86_64.AppImage NDS_Banner_Editor.AppImage
         tar -cf NDS_Banner_Editor_Linux_x64.tar NDS_Banner_Editor.AppImage
     - name: Upload artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         path: NDS_Banner_Editor_Linux_x64.tar
         name: linux_x64
@@ -48,7 +48,7 @@ jobs:
   macos:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
     - name: make
@@ -60,7 +60,7 @@ jobs:
         macdeployqt NDS_Banner_Editor.app -dmg
         mv NDS_Banner_Editor.dmg NDS_Banner_Editor_mac_x64.dmg
     - name: Upload artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         path: NDS_Banner_Editor_Mac_x64.dmg
         name: macos_x64
@@ -85,7 +85,7 @@ jobs:
       run:
         shell: msys2 {0}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Install MSYS2
       uses: msys2/setup-msys2@v2
       with:
@@ -101,7 +101,7 @@ jobs:
         mingw32-make.exe
         cd release
     - name: Upload artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         path: release/NDS_Banner_Editor.exe
         name: windows_${{ matrix.package-arch }}
