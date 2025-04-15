@@ -19,6 +19,20 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install fuse
+    - name: Download linuxdeploy
+      run: |
+        curl -o linuxdeploy -L https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+        chmod a+x linuxdeploy
+
+        curl -o linuxdeploy-plugin-qt-x86_64.AppImage -L https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+        chmod a+x linuxdeploy-plugin-qt-x86_64.AppImage
+    - name: Set build version
+      run: |
+        if [ "${{ github.event_name }}" = "release" ]; then
+          echo "BUILD_VERSION=${GITHUB_REF##*/}" >> $GITHUB_ENV
+        else
+          echo "BUILD_VERSION=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+        fi
     - name: make
       run: |
         mkdir -p appdir/usr/share/{applications,icons/hicolor/32x32/apps}
@@ -31,25 +45,18 @@ jobs:
         make -j$(nproc)
         make INSTALL_ROOT=appdir -j$(nproc) install
 
-        curl -o linuxdeploy -L https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
-        chmod a+x linuxdeploy
-
-        curl -o linuxdeploy-plugin-qt-x86_64.AppImage -L https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
-        chmod a+x linuxdeploy-plugin-qt-x86_64.AppImage
-
-        NO_STRIP=true ./linuxdeploy --appdir appdir --desktop-file appdir/usr/share/applications/NDS_Banner_Editor.desktop --output appimage --plugin qt
-        mv NDS_Banner_Editor-x86_64.AppImage NDS_Banner_Editor.AppImage
-        tar -cf NDS_Banner_Editor_Linux_x64.tar NDS_Banner_Editor.AppImage
+        NO_STRIP=true VERSION=${BUILD_VERSION} ./linuxdeploy --appdir appdir --desktop-file appdir/usr/share/applications/NDS_Banner_Editor.desktop --output appimage --plugin qt
+        mv NDS_Banner_Editor-*-x86_64.AppImage NDS_Banner_Editor_Linux_x64.AppImage
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        path: NDS_Banner_Editor_Linux_x64.tar
+        path: NDS_Banner_Editor_Linux_x64.AppImage
         name: linux_x64
     - name: Upload to release
       uses: AButler/upload-release-assets@v2.0
       if: ${{ success() && startsWith(github.ref, 'refs/tags') }}
       with:
-        files: NDS_Banner_Editor_Linux_x64.tar
+        files: NDS_Banner_Editor_Linux_x64.AppImage
         repo-token: ${{ secrets.GITHUB_TOKEN }}
 
   macos:
